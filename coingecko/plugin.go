@@ -12,9 +12,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name:             "steampipe-plugin-coingecko",
 		DefaultTransform: transform.FromGo(),
 		TableMap: map[string]*plugin.Table{
-			"coingecko_coin": tableCoin(ctx),
-			//"getml_pipeline": tablePipeline(ctx),
-
+			"coingecko_coin":   tableCoin(ctx),
+			"coingecko_market": tableMarket(ctx),
 		},
 	}
 	return p

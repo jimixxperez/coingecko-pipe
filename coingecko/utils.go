@@ -2,13 +2,14 @@ package coingecko
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"net/url"
-	"path"
 	"time"
 
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
 
 type coinGeckoClient struct {
@@ -16,13 +17,24 @@ type coinGeckoClient struct {
 	URL        string
 }
 
-func (c *coinGeckoClient) Get(subpath string) (*http.Response, error) {
-	u, err := url.Parse(c.URL)
+func (c *coinGeckoClient) Get(subpath string, target interface{}) error {
+	//u, err := url.Parse(c.URL)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//u.Path = path.Join(u.Path, subpath)
+	//r, err := c.HTTPClient.Get(u.String())
+	r, err := c.HTTPClient.Get(fmt.Sprintf("%s/%s", c.URL, subpath))
 	if err != nil {
 		log.Fatal(err)
 	}
-	u.Path = path.Join(u.Path, subpath)
-	return c.HTTPClient.Get(u.String())
+	defer r.Body.Close()
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return json.Unmarshal(body, target)
 }
 
 func connect(_ context.Context, d *plugin.QueryData) (*coinGeckoClient, error) {
